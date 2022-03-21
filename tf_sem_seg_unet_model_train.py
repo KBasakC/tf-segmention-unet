@@ -42,21 +42,22 @@ def process_path(img_path):
   
   return input_image, input_mask
 
-
 # %% Fuction augumentation
 class Augment(tf.keras.layers.Layer):
   def __init__(self):
     super().__init__()
     # # both use the same seed, so they'll make the same random changes.
-    self.augment_inputs = tf.keras.layers.experimental.preprocessing.RandomFlip(mode="horizontal_and_vertical",seed=1) # Remove experimental.preprocessing. for colab version
-    self.augment_masks = tf.keras.layers.experimental.preprocessing.RandomFlip(mode="horizontal_and_vertical",seed=1) # Remove experimental.preprocessing. for colab version
+    self.flip_inputs = tf.keras.layers.experimental.preprocessing.RandomFlip(mode="horizontal_and_vertical",seed=1) # Remove experimental.preprocessing. for colab version
+    self.flip_masks = tf.keras.layers.experimental.preprocessing.RandomFlip(mode="horizontal_and_vertical",seed=1) # Remove experimental.preprocessing. for colab version
     # # Random rotate
-    # self.augment_inputs = tf.keras.layers.experimental.preprocessing.RandomRotation(factor=0.2, seed=1) # tf.keras.layers.experimental.preprocessing.RandomRotation 
-    # self.augment_labels = tf.keras.layers.experimental.preprocessing.RandomRotation(factor=0.2, seed=1) # tf.keras.layers.experimental.preprocessing.RandomRotation
+    self.rotate_inputs = tf.keras.layers.experimental.preprocessing.RandomRotation(factor=0.3, seed=1) # tf.keras.layers.experimental.preprocessing.RandomRotation 
+    self.rotate_masks = tf.keras.layers.experimental.preprocessing.RandomRotation(factor=0.3, seed=1) # tf.keras.layers.experimental.preprocessing.RandomRotation
     
   def call(self, inputs, masks):
-    inputs = self.augment_inputs(inputs)
-    masks = self.augment_masks(masks)
+    inputs = self.flip_inputs(inputs)
+    inputs = self.rotate_inputs(inputs)
+    masks = self.flip_masks(masks)
+    masks = self.rotate_masks(masks)
     return inputs, masks
 
 # %% Function - Visualize an image example and corresponding mask from dataset

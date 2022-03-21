@@ -9,3 +9,6 @@ U-Net for semantic segmentation of cell nuclei, implemented in TensorFlow and Wa
 * Path to masks: data/mask binary
 ## Note
 Due to issues with TensorFlow tiff decoder, the .tif images were converted to .png using OpenCV and then then fed into the model. 
+## Environment 
+* Python 3.8.8 
+* TensorFlow 2.3.0 

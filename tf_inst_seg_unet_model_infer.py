@@ -63,7 +63,18 @@ def infer(image):
     instances = cv2.cvtColor(pred_mask_fullsc,cv2.COLOR_GRAY2BGR)
     markers = cv2.watershed(instances,markers)
     instances[markers == -1] = [255,0,0]
-    return markers, pred_mask, instances, n_instances, stats[1:,:]    
+    return markers, pred_mask, instances, n_instances, stats[1:,:]   
+
+# %% IoU (Intersection of Union)
+def compute_IoU(mask, pred_mask):
+    mask_bw = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    true_mask = mask_bw / mask_bw.max()
+    pred_mask = pred_mask / pred_mask.max()
+    pred_mask = pred_mask.astype('uint8')
+    intersection = np.logical_and(true_mask, pred_mask)
+    union = np.logical_or(true_mask, pred_mask)
+    iou = np.sum(intersection) / np.sum(union)
+    return iou
 
 #%% Main
 if __name__ == "__main__":
@@ -94,6 +105,7 @@ if __name__ == "__main__":
     
     # loop through the dataset and make inference to count cell nuclei and create stats
     data_stats = []
+    IoUs = []
     for filename in dir_list: #assuming tif
         # read image and mask
         image = cv2.imread(str(Path(IMG_DIR/filename)))
@@ -101,11 +113,13 @@ if __name__ == "__main__":
         [markers, pred_mask, instances, n_instances, stats] = infer(image)
         mean_cell_area = np.round(np.mean(stats[:,4]))
         display_list = ([image, mask, pred_mask, markers])
+        iou = compute_IoU(mask,pred_mask)
+        IoUs.append(iou)
         display_instances(display_list,n_instances,mean_cell_area)
-        data_stats.append([filename,n_instances,mean_cell_area])
-        print(filename + ' Nuclei:' + str(n_instances) + ' Mean area:' + str(mean_cell_area))
+        data_stats.append([filename,n_instances,mean_cell_area, iou])
+        print(filename + ' Nuclei:' + str(n_instances) + ' Mean area:' + str(mean_cell_area) + ' IoU:'+str(iou))
     
     # create dataframe and save stats in csv file with corresponding filename of images
-    df = pd.DataFrame(data_stats, columns=['Filename', 'Nuclei count', 'Mean area(a.u.)'])
+    df = pd.DataFrame(data_stats, columns=['Filename', 'Nuclei count', 'Mean area(a.u.)', 'IoU'])
     time_now=datetime.datetime.now().strftime("%d-%m-%yT%H-%M-%S") # Get current date and time
     df.to_csv(Path(out_path,('data_stats_'+ time_now +'.csv')))

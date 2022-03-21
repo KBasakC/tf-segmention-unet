@@ -216,7 +216,7 @@ if __name__ == "__main__":
     
     # %% Model compile
     OUTPUT_CLASSES = 2
-    FILTER_1 = 32
+    FILTER_1 = 64
     filts = [FILTER_1, FILTER_1*(2**1), FILTER_1*(2**2), FILTER_1*(2**3), FILTER_1*(2**4)]
     initializer = tf.keras.initializers.HeNormal() # tf.keras.initializers.GlorotUniform() # Initialization: samples from a truncated normal distribution centered on 0 with stddev = sqrt(2 / fan_in) where fan_in is the number of input units in the weight tensor.
     model = unet_model(filts,img_size,output_channels=OUTPUT_CLASSES)
